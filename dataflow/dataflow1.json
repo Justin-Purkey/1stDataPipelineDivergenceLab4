@@ -3,10 +3,22 @@
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "invoices1CSV",
+						"type": "DatasetReference"
+					},
+					"name": "invoices1source"
+				}
+			],
 			"sinks": [],
-			"transformations": [],
-			"script": ""
+			"transformations": [
+				{
+					"name": "MarkUpsert"
+				}
+			],
+			"script": "source(output(\n\t\tInvoiceID as string,\n\t\tVendorID as string,\n\t\tInvoiceNumber as string,\n\t\tInvoiceDate as string,\n\t\tInvoiceTotal as string,\n\t\tPaymentTotal as string,\n\t\tCreditTotal as string,\n\t\tTermsID as string,\n\t\tInvoiceDueDate as string,\n\t\tPaymentDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> invoices1source\ninvoices1source alterRow(upsertIf(true())) ~> MarkUpsert"
 		}
 	}
 }
