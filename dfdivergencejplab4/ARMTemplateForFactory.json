@@ -64,55 +64,163 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
+			"name": "[concat(parameters('factoryName'), '/Invoices2CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"type": "MappingDataFlow",
+				"linkedServiceName": {
+					"referenceName": "BlobInputFolder",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
 				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "invoices1CSV",
-								"type": "DatasetReference"
-							},
-							"name": "invoices1source"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "InvoicesDB",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "MarkUpsert"
-						}
-					],
-					"script": "source(output(\n\t\tInvoiceID as short,\n\t\tVendorID as short,\n\t\tInvoiceNumber as string,\n\t\tInvoiceDate as timestamp,\n\t\tInvoiceTotal as double,\n\t\tPaymentTotal as double,\n\t\tCreditTotal as double,\n\t\tTermsID as short,\n\t\tInvoiceDueDate as timestamp,\n\t\tPaymentDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> invoices1source\ninvoices1source alterRow(upsertIf(true())) ~> MarkUpsert\nMarkUpsert sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
-				}
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Invoices2.csv",
+						"container": "input"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "InvoiceID",
+						"type": "String"
+					},
+					{
+						"name": "VendorID",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceNumber",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceDate",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceTotal",
+						"type": "String"
+					},
+					{
+						"name": "PaymentTotal",
+						"type": "String"
+					},
+					{
+						"name": "CreditTotal",
+						"type": "String"
+					},
+					{
+						"name": "TermsID",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceDueDate",
+						"type": "String"
+					},
+					{
+						"name": "PaymentDate",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/invoices1CSV')]",
-				"[concat(variables('factoryId'), '/datasets/InvoicesDB')]"
+				"[concat(variables('factoryId'), '/linkedServices/BlobInputFolder')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/BlobInputFolder')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/Invoices3')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"linkedServiceName": {
+					"referenceName": "BlobInputFolder",
+					"type": "LinkedServiceReference"
+				},
 				"annotations": [],
-				"type": "AzureBlobStorage",
+				"type": "DelimitedText",
 				"typeProperties": {
-					"connectionString": "[parameters('BlobInputFolder_connectionString')]"
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Invoices3.csv",
+						"container": "input"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "InvoiceID",
+						"type": "String"
+					},
+					{
+						"name": "VendorID",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceNumber",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceDate",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceTotal",
+						"type": "String"
+					},
+					{
+						"name": "PaymentTotal",
+						"type": "String"
+					},
+					{
+						"name": "CreditTotal",
+						"type": "String"
+					},
+					{
+						"name": "TermsID",
+						"type": "String"
+					},
+					{
+						"name": "InvoiceDueDate",
+						"type": "String"
+					},
+					{
+						"name": "PaymentDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/BlobInputFolder')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/InvoicesDB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "InvoicesDBCreate",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "invoices"
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/InvoicesDBCreate')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/invoices1CSV')]",
@@ -184,6 +292,19 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/BlobInputFolder')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('BlobInputFolder_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/InvoicesDBCreate')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -197,24 +318,41 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/InvoicesDB')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "InvoicesDBCreate",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
+				"type": "MappingDataFlow",
 				"typeProperties": {
-					"schema": "dbo",
-					"table": "invoices"
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Invoices3",
+								"type": "DatasetReference"
+							},
+							"name": "invoices1source"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "InvoicesDB",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "MarkUpsert"
+						}
+					],
+					"script": "source(output(\n\t\tInvoiceID as short,\n\t\tVendorID as short,\n\t\tInvoiceNumber as string,\n\t\tInvoiceDate as date 'MM/dd/yyyy',\n\t\tInvoiceTotal as double,\n\t\tPaymentTotal as double,\n\t\tCreditTotal as double,\n\t\tTermsID as short,\n\t\tInvoiceDueDate as date 'MM/dd/yyyy',\n\t\tPaymentDate as date 'MM/dd/yyyy'\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tlimit: 100) ~> invoices1source\ninvoices1source alterRow(upsertIf(true())) ~> MarkUpsert\nMarkUpsert sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['InvoiceID'],\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/InvoicesDBCreate')]"
+				"[concat(variables('factoryId'), '/datasets/Invoices3')]",
+				"[concat(variables('factoryId'), '/datasets/InvoicesDB')]"
 			]
 		}
 	]
