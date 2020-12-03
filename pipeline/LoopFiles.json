@@ -68,7 +68,7 @@
 									"datasetParameters": {
 										"invoices1source": {
 											"FileName": {
-												"value": "@item()",
+												"value": "@item().name",
 												"type": "Expression"
 											}
 										}
